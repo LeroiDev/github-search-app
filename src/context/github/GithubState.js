@@ -8,8 +8,6 @@ import {
   GET_REPOS,
   CLEAR_USERS,
   SET_LOADING,
-  SET_ALERT,
-  REMOVE_ALERT,
 } from "../Types";
 
 const GithubState = (props) => {
@@ -30,11 +28,31 @@ const GithubState = (props) => {
     dispatch({ type: SEARCH_USERS, payload: response.data.items });
     // no need to set loading after set to false in the reducer
   };
-  // Get User
+  // get single github user
+  const getUser = async (userName) => {
+    setLoading();
+    const response = await axios.get(
+      `https://api.github.com/users/${userName}?client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
+    dispatch({ type: GET_USER, payload: response.data });
+  };
 
-  // get Repos
+  // get user REPOS
+  const getUserRepos = async (userName) => {
+    setLoading();
+    const response = await axios.get(
+      `https://api.github.com/users/${userName}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+    );
+    dispatch({
+      type: GET_REPOS,
+      payload: response.data,
+    });
+  };
 
   // Clear Users Button
+  const clearUsersBtn = () => {
+    dispatch({ type: CLEAR_USERS });
+  };
 
   // Set Loading?
   const setLoading = () => {
@@ -49,6 +67,9 @@ const GithubState = (props) => {
         repos: state.repos,
         loading: state.loading,
         searchUsers,
+        clearUsersBtn,
+        getUser,
+        getUserRepos,
       }}
     >
       {props.children}
